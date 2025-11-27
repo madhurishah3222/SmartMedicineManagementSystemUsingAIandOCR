@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Health Advice{% endblock %}
+{% block additional_styles %}
+  .page-title { color: var(--primary-color); font-weight: 700; text-align: center; }
+  /* Nude pink background for this page only */
+  .content-wrapper {
+    background:
+      radial-gradient(1200px 600px at -10% -20%, rgba(255, 182, 193, 0.12) 0%, transparent 60%),
+      radial-gradient(1200px 600px at 110% 120%, rgba(255, 192, 203, 0.14) 0%, transparent 60%),
+      linear-gradient(135deg, #fff5f8 0%, #ffe3ee 100%);
+  }
+  #adviceForm {
+    max-width: 1000px; margin: 0 auto;
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 16px; padding: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    display: grid; grid-template-columns: 1fr auto; gap: 12px;
+  }
+  #adviceForm:focus-within {
+    border-color: #f8bbd0;
+    box-shadow: 0 0 0 4px rgba(232,62,140,0.08), 0 8px 24px rgba(232,62,140,0.12);
+  }
+  #adviceResult { max-width: 1000px; margin: 14px auto 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .bar-input { border-radius: 9999px; border: 1px solid var(--border-color); padding: 12px 18px; }
+  .bar-input:focus { box-shadow: 0 0 0 0.2rem rgba(232,62,140,0.15); border-color: var(--primary-color); }
+  .bar-button { border-radius: 9999px; padding: 12px 22px; }
+  .btn-primary { background: linear-gradient(90deg, var(--primary-color), #ff69b4); border-color: var(--primary-color); }
+  .btn-primary:hover { background: #d63384; border-color: #d63384; }
+{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-3 page-title">General Health Advice</h2>
+  <p class="text-muted">Ask about a symptom or condition (e.g., "fever", "cough").</p>
+  <form id="adviceForm">
+      <input type="text" class="bar-input" id="adviceInput" placeholder="Enter condition" required />
+      <button class="btn btn-primary bar-button" type="submit">Get Advice</button>
+  </form>
+  <div id="adviceResult" class="mt-4 p-3 border rounded bg-light"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('adviceForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const box = document.getElementById('adviceResult');
+    box.innerHTML = 'Working...';
+    try {
+      const q = document.getElementById('adviceInput').value.trim();
+      const r = await fetch('/api/health', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({query:q})});
+      const data = await r.json();
+      box.innerHTML = data.response || 'No advice available.';
+    } catch (err) {
+      box.innerHTML = 'Failed to fetch advice.';
+    }
+  });
+</script>
+{% endblock %}

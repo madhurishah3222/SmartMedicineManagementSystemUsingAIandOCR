@@ -1,0 +1,840 @@
+{% extends "base.html" %}
+
+{% block title %}Dr. Jeevika - Your Health Companion{% endblock %}
+
+{% block stylesheets %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block head %}
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+<style>
+    /* Use theme variables from base (role-based) */
+
+    body {
+        background: var(--page-gradient);
+        min-height: 100vh;
+        padding: 20px;
+        color: var(--text-color, #4a4a4a);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.05); /* Subtle text shadow for depth */
+    }
+
+    /* New keyframe animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    .container {
+        max-width: 750px; /* Slightly larger */
+        margin: 30px auto; /* More margin */
+        background: rgba(255, 255, 255, 0.95); /* Less transparent */
+        border-radius: 25px; /* Larger border-radius */
+        box-shadow: 0 15px 30px rgba(255, 182, 193, 0.3); /* Stronger shadow */
+        padding: 30px;
+        backdrop-filter: blur(10px); /* More blur */
+        animation: fadeInUp 0.8s ease-out forwards; /* Entrance animation */
+    }
+
+    .container:hover {
+        transform: translateY(-8px); /* Lift effect on hover */
+        box-shadow: 0 20px 40px rgba(255, 182, 193, 0.4); /* Stronger shadow on hover */
+        transition: all 0.4s ease; /* Smooth transition */
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 30px; /* More margin */
+        color: var(--accent-color);
+        font-size: 2.5rem; /* Larger font size */
+        font-weight: 700;
+    }
+
+    .chat-container {
+        height: calc(100vh - 320px); /* Adjusted height */
+        overflow-y: auto;
+        margin-bottom: 25px; /* More margin */
+        padding-right: 12px; /* Space for scrollbar */
+    }
+
+    /* Custom Scrollbar */
+    .chat-container::-webkit-scrollbar {
+        width: 10px; /* Thicker scrollbar */
+    }
+
+    .chat-container::-webkit-scrollbar-track {
+        background: var(--light-bg); /* Lighter track */
+        border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-color);
+    }
+
+    .message {
+        max-width: 80%; /* Slightly narrower messages */
+        margin: 15px 0; /* More vertical space */
+        padding: 18px 25px; /* More padding */
+        border-radius: 25px; /* More rounded */
+        line-break: anywhere; /* Prevent long words from overflowing */
+        animation: fadeIn 0.6s ease-out; /* Smoother fade-in */
+    }
+
+    /* Specific styling for unordered lists within bot messages for health advice */
+    .bot-message ul {
+        list-style: disc !important;
+        margin-left: 20px !important;
+        padding-left: 0 !important;
+        margin-top: 10px !important;
+        text-align: left !important;
+    }
+
+    .bot-message ul li {
+        margin-bottom: 5px !important;
+        padding-left: 5px !important;
+    }
+
+    /* Styling for medicine details */
+    .medicine-details {
+        margin-top: 15px; /* Increased margin-top */
+        padding: 15px; /* Increased padding */
+        background-color: var(--light-bg); /* Use light background variable */
+        border-radius: 20px; /* More rounded corners */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Softer shadow */
+        border: 1px solid var(--primary-color); /* Subtle border */
+    }
+
+    .detail-item {
+        margin-bottom: 10px; /* Increased margin-bottom */
+        padding: 8px; /* Increased padding */
+        color: var(--text-color);
+        line-height: 1.5; /* Improved line spacing */
+        border-bottom: 1px dashed rgba(255,182,193,0.5); /* Dashed separator */
+    }
+
+    .detail-item:last-child {
+        border-bottom: none; /* No border for the last item */
+    }
+
+    .detail-item strong {
+        color: var(--accent-color);
+        margin-right: 5px; /* Space after bold label */
+    }
+
+    /* Ensure strong tags are consistently styled within messages */
+    .message strong {
+        font-weight: 700; /* Explicitly bold */
+        color: var(--accent-color); /* Consistent color */
+    }
+
+    .bot-message strong {
+        color: var(--accent-color);
+    }
+
+    .bot-message br {
+        display: block; /* Ensure <br> creates a new line */
+        margin-bottom: 5px; /* Add some space between lines */
+    }
+
+    .bot-message {
+        background-color: var(--bot-message-bg);
+        margin-right: auto;
+        border-bottom-left-radius: 8px; /* Slightly different corner for bots */
+        box-shadow: 3px 3px 10px rgba(255, 182, 193, 0.4); /* Stronger shadow */
+    }
+
+    .user-message {
+        background-color: var(--user-message-bg);
+        margin-left: auto;
+        border-bottom-right-radius: 8px; /* Slightly different corner for users */
+        box-shadow: -3px 3px 10px rgba(173, 216, 230, 0.5); /* Stronger light blue shadow */
+    }
+
+    /* Markdown Basic Styling */
+    .message strong {
+        color: var(--accent-color);
+    }
+
+    .option-button {
+        display: block;
+        width: 100%;
+        padding: 14px 25px; /* More padding */
+        margin: 12px 0; /* More margin */
+        background-color: var(--white);
+        border: 2px solid var(--primary-color); /* Thicker border */
+        border-radius: 15px; /* More rounded */
+        text-align: left;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-color);
+        font-weight: 600; /* Bolder */
+        box-shadow: 2px 2px 8px rgba(255, 182, 193, 0.3);
+        animation: pulse 2s infinite ease-in-out; /* Pulse animation */
+    }
+
+    .option-button:hover {
+        background-color: var(--light-bg);
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+        transform: translateY(-3px) scale(1.01); /* More pronounced lift and subtle scale */
+        box-shadow: 2px 5px 12px rgba(255, 105, 180, 0.4);
+    }
+
+    .suggestion-chip {
+        display: inline-block;
+        padding: 10px 18px; /* More padding */
+        margin: 6px 6px 6px 0; /* More margin */
+        background-color: var(--secondary-color);
+        border-radius: 30px; /* More rounded */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--white);
+        font-size: 0.95rem; /* Slightly larger */
+        box-shadow: 2px 2px 8px rgba(255, 105, 180, 0.35);
+    }
+
+    .suggestion-chip:hover {
+        background-color: var(--accent-color);
+        transform: translateY(-3px) scale(1.02); /* More pronounced lift and subtle scale */
+        box-shadow: 2px 5px 12px rgba(255, 105, 180, 0.5);
+    }
+
+    .input-area {
+        display: flex;
+        align-items: center;
+        gap: 12px; /* More spacing */
+        padding-top: 15px; /* More space above input */
+    }
+
+    #user-input {
+        flex-grow: 1;
+        padding: 15px 20px; /* More padding */
+        border: 2px solid var(--primary-color); /* Thicker border */
+        border-radius: 30px; /* More rounded input */
+        font-size: 1.05rem; /* Slightly larger font */
+        transition: all 0.3s ease;
+        box-shadow: inset 1px 1px 7px rgba(0,0,0,0.15);
+    }
+
+    #user-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: inset 1px 1px 7px rgba(0,0,0,0.15), 0 0 10px rgba(255, 105, 180, 0.5); /* Stronger shadow */
+    }
+
+    .send-button {
+        background: var(--accent-color);
+        border: none;
+        padding: 14px 30px; /* More padding */
+        border-radius: 30px; /* More rounded */
+        color: var(--white);
+        font-weight: 700; /* Bolder */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 12px rgba(255, 105, 180, 0.4); /* Stronger shadow */
+        animation: pulse 2s infinite ease-in-out; /* Pulse animation */
+    }
+
+    .send-button:hover {
+        background: var(--primary-color);
+        transform: translateY(-3px); /* More pronounced lift */
+        box-shadow: 0 8px 18px rgba(255, 105, 180, 0.5); /* Stronger shadow */
+    }
+
+    .typing-indicator {
+        display: inline-block;
+        margin: 15px 0; /* More margin */
+        padding: 12px 25px; /* More padding */
+        background-color: var(--bot-message-bg);
+        border-radius: 25px; /* More rounded */
+        animation: fadeIn 0.6s ease-out;
+        box-shadow: 3px 3px 10px rgba(255, 182, 193, 0.4);
+    }
+
+    .typing-indicator span {
+        display: inline-block;
+        width: 10px; /* Larger dots */
+        height: 10px; /* Larger dots */
+        background-color: var(--accent-color);
+        border-radius: 50%;
+        margin: 0 4px; /* More space */
+        animation: typing 1s infinite;
+    }
+
+    .typing-indicator span:nth-child(1) { animation-delay: 0s; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+        0%, 80%, 100% { transform: translateY(0); opacity: 0.7; }
+        40% { transform: translateY(-7px); opacity: 1; /* More pronounced bounce */}
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .back-to-main-button {
+        display: inline-block;
+        margin-top: 25px;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-to-main-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+    
+    /* Styles for the new search bar in chatbot */
+    .medicine-search-container {
+        position: relative;
+        width: 100%;
+        margin-top: 15px;
+    }
+    .medicine-search-box {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1em;
+    }
+    .medicine-suggestions {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        z-index: 100;
+        max-height: 200px;
+        overflow-y: auto;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        display: none;
+    }
+    .medicine-suggestion-item {
+        padding: 10px 15px;
+        cursor: pointer;
+    }
+    .medicine-suggestion-item:hover {
+        background-color: #f0f0f0;
+    }
+    
+    /* Prescription upload styles */
+    .prescription-upload-container {
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    #prescriptionFileInput {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid var(--primary-color);
+        border-radius: 10px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    #prescriptionFileInput:hover {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+    }
+    
+    .prescription-results {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: var(--light-bg);
+        border-radius: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+    
+    .medicine-availability-item {
+        padding: 10px;
+        margin: 10px 0;
+        background-color: white;
+        border-radius: 10px;
+        border-left: 4px solid var(--accent-color);
+    }
+    
+    .medicine-availability-item.available {
+        border-left-color: #4caf50;
+    }
+    
+    .medicine-availability-item.unavailable {
+        border-left-color: #f44336;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container shadow-lg rounded-lg">
+    <h1 class="header mb-6">Dr. Jeevika - Your Health Companion</h1>
+
+    <div id="chat-messages" class="chat-container bg-white p-4 rounded-lg shadow-inner mb-6">
+        <div class="message bot-message">
+            Hello! I'm Dr. Jeevika. How can I assist you today?
+            <br><br>
+            Please choose an option:
+            <br>
+            <strong>1. General Health Advice</strong>
+            <br>
+            <strong>2. Medicine Information</strong>
+            <br>
+            <strong>3. Enquiry about Medicine Availability</strong>
+            <br>
+            <strong>4. Upload Prescription</strong>
+            <br>
+            <strong>5. Exit</strong>
+        </div>
+    </div>
+
+    <div id="input-area" class="input-area flex items-center">
+        <input type="text" id="user-input" class="flex-grow p-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-pink-300" placeholder="Type your message..." autofocus>
+        <button id="send-button" class="send-button bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 px-6 rounded-full">
+            Send
+        </button>
+    </div>
+
+    <div id="medicine-enquiry-fields" style="display: none;">
+        <div class="medicine-search-container">
+            <input type="text" id="medicineNameInput" class="medicine-search-box" placeholder="Enter medicine name..." autocomplete="off">
+            <div id="medicineSuggestions" class="medicine-suggestions"></div>
+        </div>
+        <input type="number" id="medicineQuantityInput" class="medicine-search-box mt-3" placeholder="Enter quantity..." min="1">
+        <button id="submitMedicineEnquiry" class="send-button mt-4 w-full">Check Availability</button>
+    </div>
+
+    <div id="prescription-upload-fields" style="display: none;">
+        <div class="prescription-upload-container">
+            <input type="file" id="prescriptionFileInput" accept="image/*" class="medicine-search-box" style="padding: 15px;">
+            <div id="prescriptionPreview" style="margin-top: 15px; display: none;">
+                <img id="prescriptionPreviewImg" src="" alt="Prescription Preview" style="max-width: 100%; max-height: 300px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            </div>
+            <button id="submitPrescription" class="send-button mt-4 w-full">Analyze Prescription</button>
+        </div>
+    </div>
+
+    <div class="text-center mt-6">
+        <a href="{{ url_for('index') }}" class="back-to-main-button">
+            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Back to Main Portal
+        </a>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatMessages = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const inputArea = document.getElementById('input-area');
+        const medicineEnquiryFields = document.getElementById('medicine-enquiry-fields');
+        const medicineNameInput = document.getElementById('medicineNameInput');
+        const medicineQuantityInput = document.getElementById('medicineQuantityInput');
+        const medicineSuggestionsContainer = document.getElementById('medicineSuggestions');
+        const submitMedicineEnquiryButton = document.getElementById('submitMedicineEnquiry');
+        const prescriptionUploadFields = document.getElementById('prescription-upload-fields');
+        const prescriptionFileInput = document.getElementById('prescriptionFileInput');
+        const prescriptionPreview = document.getElementById('prescriptionPreview');
+        const prescriptionPreviewImg = document.getElementById('prescriptionPreviewImg');
+        const submitPrescriptionButton = document.getElementById('submitPrescription');
+
+        let currentChatState = 'main_menu'; // 'main_menu', 'general_health', 'medicine_info', 'medicine_enquiry_name', 'medicine_enquiry_quantity', 'prescription_upload'
+        let selectedMedicineName = '';
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender + '-message');
+            messageDiv.innerHTML = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to bottom
+        }
+
+        function showMainMenu() {
+            addMessage('bot', `
+                Please choose an option:
+                <br>
+                <strong>1. General Health Advice</strong>
+                <br>
+                <strong>2. Medicine Information</strong>
+                <br>
+                <strong>3. Enquiry about Medicine Availability</strong>
+                <br>
+                <strong>4. Upload Prescription</strong>
+                <br>
+                <strong>5. Exit</strong>
+            `);
+            inputArea.style.display = 'flex';
+            medicineEnquiryFields.style.display = 'none';
+            prescriptionUploadFields.style.display = 'none';
+            medicineNameInput.value = ''; // Clear medicine name input
+            medicineQuantityInput.value = ''; // Clear medicine quantity input
+            medicineSuggestionsContainer.style.display = 'none'; // Hide suggestions
+            prescriptionFileInput.value = ''; // Clear prescription file input
+            prescriptionPreview.style.display = 'none'; // Hide preview
+            userInput.value = '';
+            userInput.focus();
+            currentChatState = 'main_menu';
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('typing-indicator', 'bot-message');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingDiv = document.getElementById('typing-indicator');
+            if (typingDiv) {
+                typingDiv.remove();
+            }
+        }
+
+        function sendMessage() {
+            let message = userInput.value.trim();
+            let inputSource = 'user-input';
+
+            if (currentChatState === 'medicine_info_name') {
+                message = medicineNameInput.value.trim();
+                inputSource = 'medicine-name-input';
+            }
+
+            if (message === '') return;
+
+            addMessage('user', message);
+
+            if (inputSource === 'user-input') {
+                userInput.value = '';
+            } else {
+                medicineNameInput.value = ''; // Clear the medicine input field
+                medicineSuggestionsContainer.style.display = 'none'; // Hide suggestions
+            }
+
+            showTypingIndicator();
+
+            if (currentChatState === 'main_menu') {
+                handleMainMenuSelection(message);
+            } else if (currentChatState === 'general_health') {
+                fetchBotResponse(message, '/api/health');
+            } else if (currentChatState === 'medicine_info_name') {
+                fetchBotResponse(message, '/api/medicine-info');
+            }
+        }
+
+        function handleMainMenuSelection(selection) {
+            switch (selection) {
+                case '1':
+                    addMessage('bot', 'Please tell me what health condition you need advice on.');
+                    currentChatState = 'general_health';
+                    break;
+                case '2':
+                    addMessage('bot', 'Which specific medicine are you looking for information about? (e.g., Dolo 650, Augmentin)');
+                    inputArea.style.display = 'none'; // Hide general input
+                    medicineEnquiryFields.style.display = 'block'; // Show medicine input fields
+                    medicineNameInput.value = ''; // Clear previous input
+                    medicineQuantityInput.style.display = 'none'; // Hide quantity as it's not needed for info
+                    submitMedicineEnquiryButton.style.display = 'none'; // Hide submit button for enquiry
+                    medicineNameInput.focus();
+                    currentChatState = 'medicine_info_name'; // New state for medicine info input
+                    break;
+                case '3':
+                    addMessage('bot', 'Please enter the medicine name and quantity you want to check availability for.');
+                    inputArea.style.display = 'none';
+                    medicineEnquiryFields.style.display = 'block';
+                    medicineNameInput.value = ''; // Clear previous input
+                    medicineQuantityInput.value = ''; // Clear previous input
+                    medicineQuantityInput.style.display = 'block'; // Ensure quantity is visible for enquiry
+                    submitMedicineEnquiryButton.style.display = 'block'; // Ensure submit button is visible for enquiry
+                    medicineNameInput.focus();
+                    currentChatState = 'medicine_enquiry_name';
+                    break;
+                case '4':
+                    addMessage('bot', 'Please upload an image of your prescription. I will identify the medicines and check their availability in our store.');
+                    inputArea.style.display = 'none';
+                    medicineEnquiryFields.style.display = 'none';
+                    prescriptionUploadFields.style.display = 'block';
+                    prescriptionFileInput.value = '';
+                    prescriptionPreview.style.display = 'none';
+                    currentChatState = 'prescription_upload';
+                    break;
+                case '5':
+                    addMessage('bot', 'Goodbye! If you need anything else, feel free to come back.');
+                    setTimeout(() => {
+                        window.location.href = '{{ url_for('index') }}';
+                    }, 2000);
+                    break;
+                default:
+                    addMessage('bot', 'Invalid option. Please choose a number from 1 to 5.');
+                    break;
+            }
+            removeTypingIndicator();
+        }
+
+        function fetchBotResponse(query, apiEndpoint) {
+            fetch(apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query: query }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeTypingIndicator();
+                addMessage('bot', data.response);
+                showMainMenu(); // Go back to main menu after any response
+                // Ensure all specific input fields are hidden after response
+                inputArea.style.display = 'flex';
+                medicineEnquiryFields.style.display = 'none';
+                medicineNameInput.value = '';
+                medicineQuantityInput.value = '';
+                medicineSuggestionsContainer.style.display = 'none';
+            })
+            .catch(error => {
+                removeTypingIndicator();
+                console.error('Error:', error);
+                addMessage('bot', 'Sorry, I am having trouble connecting. Please try again later.');
+                showMainMenu(); // Go back to main menu even on error
+            });
+        }
+
+        // --- Medicine Enquiry Specific Logic ---
+
+        let allMedicineNames = []; // This will be populated from the backend
+
+        // Fetch all medicine names for suggestions
+        fetch('/api/get_medicine_names')
+            .then(response => response.json())
+            .then(data => {
+                allMedicineNames = data.medicine_names;
+            })
+            .catch(error => console.error('Error fetching medicine names:', error));
+
+        function showMedicineSuggestions(searchTerm) {
+            if (!searchTerm) {
+                medicineSuggestionsContainer.style.display = 'none';
+                return;
+            }
+            const lowerSearchTerm = searchTerm.toLowerCase();
+            const filteredSuggestions = allMedicineNames.filter(name => 
+                name.toLowerCase().includes(lowerSearchTerm)
+            );
+
+            if (filteredSuggestions.length > 0) {
+                medicineSuggestionsContainer.innerHTML = filteredSuggestions
+                    .map(suggestion => `
+                        <div class="medicine-suggestion-item" data-value="${suggestion}">
+                            ${highlightText(suggestion, searchTerm)}
+                        </div>
+                    `).join('');
+                medicineSuggestionsContainer.style.display = 'block';
+            } else {
+                medicineSuggestionsContainer.innerHTML = '<div class="medicine-suggestion-item">No suggestions</div>';
+                medicineSuggestionsContainer.style.display = 'block';
+            }
+        }
+
+        // Reuse highlightText from medicine_database.html
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight" style="background-color: #fff3cd; padding: 2px; border-radius: 3px;">$1</span>');
+        }
+
+        // Event listener for medicine name input
+        medicineNameInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            console.log('Medicine Name Input - searchTerm:', searchTerm); // Debug log
+            showMedicineSuggestions(searchTerm);
+        });
+
+        // Event listener for Enter key on medicine name input
+        medicineNameInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter' && currentChatState === 'medicine_info_name') {
+                console.log('Enter key pressed for medicine info. Sending message...'); // Debug log
+                sendMessage();
+            }
+        });
+
+        // Event listener for medicine suggestion clicks
+        medicineSuggestionsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('medicine-suggestion-item')) {
+                const selectedValue = e.target.dataset.value;
+                medicineNameInput.value = selectedValue;
+                medicineSuggestionsContainer.style.display = 'none';
+                selectedMedicineName = selectedValue; // Store the selected medicine name
+                console.log('Suggestion clicked. Selected value:', selectedValue, 'Current state:', currentChatState); // Debug log
+
+                if (currentChatState === 'medicine_info_name') {
+                    sendMessage(); // Directly send the message for medicine info
+                } else if (currentChatState === 'medicine_enquiry_name') {
+                    medicineQuantityInput.focus(); // Move focus to quantity input for enquiry
+                }
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!medicineNameInput.contains(e.target) && !medicineSuggestionsContainer.contains(e.target)) {
+                medicineSuggestionsContainer.style.display = 'none';
+            }
+        });
+
+        // Event listener for submit medicine enquiry button
+        submitMedicineEnquiryButton.addEventListener('click', function() {
+            const medicineName = medicineNameInput.value.trim();
+            const quantity = parseInt(medicineQuantityInput.value);
+
+            if (medicineName === '') {
+                addMessage('bot', 'Please enter a medicine name.');
+                return;
+            }
+            if (isNaN(quantity) || quantity <= 0) {
+                addMessage('bot', 'Please enter a valid quantity.');
+                return;
+            }
+
+            addMessage('user', `Checking availability for ${quantity} of ${medicineName}...`);
+            showTypingIndicator();
+
+            fetch('/api/check_medicine_availability', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ medicine_name: medicineName, quantity: quantity }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeTypingIndicator();
+                addMessage('bot', data.response);
+                showMainMenu(); // Go back to main menu after enquiry
+            })
+            .catch(error => {
+                removeTypingIndicator();
+                console.error('Error:', error);
+                addMessage('bot', 'Sorry, I am having trouble checking availability. Please try again later.');
+                showMainMenu();
+            });
+        });
+
+        // Prescription file input preview
+        prescriptionFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    prescriptionPreviewImg.src = event.target.result;
+                    prescriptionPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                prescriptionPreview.style.display = 'none';
+            }
+        });
+
+        // Submit prescription button
+        submitPrescriptionButton.addEventListener('click', function() {
+            const file = prescriptionFileInput.files[0];
+            if (!file) {
+                addMessage('bot', 'Please select a prescription image to upload.');
+                return;
+            }
+
+            addMessage('user', 'Uploading prescription for analysis...');
+            showTypingIndicator();
+
+            const formData = new FormData();
+            formData.append('prescription', file);
+
+            fetch('/api/analyze_prescription', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeTypingIndicator();
+                if (data.error) {
+                    addMessage('bot', 'Sorry, I encountered an error: ' + data.error);
+                } else {
+                    let responseMessage = '<strong>Prescription Analysis Results:</strong><br><br>';
+                    
+                    if (data.medicines && data.medicines.length > 0) {
+                        responseMessage += '<div class="prescription-results">';
+                        data.medicines.forEach(med => {
+                            const statusClass = med.available ? 'available' : 'unavailable';
+                            const statusText = med.available 
+                                ? `✅ Available (${med.quantity} units in stock, Price: ₹${med.price.toFixed(2)} per unit)`
+                                : '❌ Not Available';
+                            
+                            responseMessage += `<div class="medicine-availability-item ${statusClass}">`;
+                            responseMessage += `<strong>${med.name}</strong><br>`;
+                            responseMessage += `Status: ${statusText}`;
+                            if (med.quantity_requested) {
+                                responseMessage += `<br>Requested Quantity: ${med.quantity_requested}`;
+                            }
+                            responseMessage += `</div>`;
+                        });
+                        responseMessage += '</div>';
+                    } else {
+                        responseMessage += 'No medicines were identified in the prescription. Please ensure the image is clear and contains readable text.';
+                    }
+                    
+                    addMessage('bot', responseMessage);
+                }
+                showMainMenu();
+            })
+            .catch(error => {
+                removeTypingIndicator();
+                console.error('Error:', error);
+                addMessage('bot', 'Sorry, I am having trouble processing the prescription. Please try again later.');
+                showMainMenu();
+            });
+        });
+
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initial greeting
+        // Initial greeting is already in the HTML
+    });
+</script>
+{% endblock %}

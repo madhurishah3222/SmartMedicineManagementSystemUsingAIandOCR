@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}BMI Calculator{% endblock %}
+{% block additional_styles %}
+    :root {
+        --primary-color: #ffb6c1;
+        --secondary-color: #ffc0cb;
+        --accent-color: #ff69b4;
+        --text-color: #4a4a4a;
+        --light-bg: #fff0f5;
+        --white: #ffffff;
+        --dark-text: #333;
+        --border-color: #ddd;
+    }
+
+    body {
+        background: linear-gradient(135deg, #ffe4e1 0%, #ffb6c1 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: var(--text-color);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        text-shadow: 0 1px 1px rgba(0,0,0,0.05); /* Subtle text shadow for depth */
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    .bmi-wrapper { max-width: 700px; margin: 24px auto; background: rgba(255,255,255,0.92); border-radius: 24px; box-shadow: 0 15px 30px rgba(0,0,0,0.08); padding: 40px; backdrop-filter: blur(8px); text-align: center; }
+    .bmi-wrapper:hover { transform: translateY(-4px); transition: all .3s ease; box-shadow: 0 18px 36px rgba(0,0,0,0.12); }
+    .header { color: var(--accent-color); font-size: 2.4rem; font-weight: 800; margin-bottom: 28px; }
+    .form-label { color: var(--dark-text); font-weight: 600; text-align: left; display: block; margin-bottom: 8px; }
+    .form-control { border-color: var(--border-color); border-radius: 14px; padding: 12px 18px; background-color: #f8fbfc; }
+    .form-control:focus { border-color: var(--primary-color); box-shadow: 0 0 0 .25rem rgba(15,185,177,.15); outline: none; background-color: #fff; }
+    .btn-primary { background: linear-gradient(90deg, var(--primary-color), var(--accent-color)); border: none; padding: 14px 36px; border-radius: 9999px; font-weight: 700; box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(0,0,0,0.16); }
+    #resultArea { margin-top: 28px; padding: 22px; background: #f7fbfd; border-radius: 16px; font-size: 1.2rem; font-weight: 600; box-shadow: inset 0 0 0 1px var(--border-color); min-height: 64px; display: flex; align-items: center; justify-content: center; }
+    .bmi-categories { margin-top: 24px; text-align: left; padding: 18px; background: #f7fbfd; border-radius: 16px; box-shadow: inset 0 0 0 1px var(--border-color); }
+    .bmi-categories h6 { color: var(--accent-color); margin-bottom: 12px; font-weight: 700; }
+    .back-link { display: inline-block; margin-top: 28px; color: var(--dark-text); text-decoration: none; font-weight: 600; }
+    .back-link:hover { color: var(--accent-color); }
+    .result-underweight { color: #2196F3; } /* Blue */
+    .result-normal { color: #4CAF50; } /* Green */
+    .result-overweight { color: #FF9800; } /* Orange */
+    .result-obesity-i { color: #F44336; } /* Red */
+    .result-obesity-ii { color: #D32F2F; } /* Dark Red */
+    .result-obesity-iii { color: #B71C1C; } /* Darker Red */
+    .form-check-label {
+        font-weight: 500;
+        color: var(--text-color);
+    }
+{% endblock %}
+{% block content %}
+    <div class="bmi-wrapper">
+        <div class="header">BMI Calculator</div>
+        <form id="bmiForm" method="POST" action="/bmi">
+            <div class="mb-3">
+                <label class="form-label">Gender:</label>
+                <div class="d-flex justify-content-center gap-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="male" value="male" required {% if gender == 'male' %}checked{% endif %}>
+                        <label class="form-check-label" for="male">Male</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="gender" id="female" value="female" required {% if gender == 'female' %}checked{% endif %}>
+                        <label class="form-check-label" for="female">Female</label>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="weight" class="form-label">Weight (kg):</label>
+                <input type="number" class="form-control" id="weight" name="weight" step="0.1" value="{{ weight if weight else '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="height" class="form-label">Height (cm):</label>
+                <input type="number" class="form-control" id="height" name="height" step="0.1" value="{{ height if height else '' }}" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Calculate BMI</button>
+        </form>
+        <div id="resultArea">
+            {% if bmi_result %}
+                <div class="text-center">
+                    <div class="bmi-result">Your BMI is {{ bmi_result.bmi }}</div>
+                    <div class="bmi-status result-{{ bmi_result.category.lower().replace(' ', '-').replace('(', '').replace(')', '') }}">Status: {{ bmi_result.category }}</div>
+                </div>
+            {% elif error_message %}
+                <div class="text-danger">Error: {{ error_message }}</div>
+            {% endif %}
+        </div>
+        <div class="bmi-categories">
+            <h6>BMI Categories:</h6>
+            <ul class="mb-0">
+                <li>Under 18.5: Underweight</li>
+                <li>18.5 - 24.9: Normal weight</li>
+                <li>25 - 29.9: Overweight</li>
+                <li>30 - 34.9: Obesity (Class I)</li>
+                <li>35 - 39.9: Obesity (Class II)</li>
+                <li>40 and above: Extreme Obesity (Class III)</li>
+            </ul>
+        </div>
+        <a href="/index" class="back-link"><i class="fas fa-arrow-left"></i> Back to User Portal</a>
+    </div>
+{% endblock %}

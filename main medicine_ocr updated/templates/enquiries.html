@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Medicine Enquiries</h2>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Medicine Name</th>
+                    <th>Quantity Requested</th>
+                    <th>User Name</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enquiry in enquiries %}
+                <tr>
+                    <td>{{ enquiry.medicine_name }}</td>
+                    <td>{{ enquiry.quantity }}</td>
+                    <td>{{ enquiry.user_name }}</td>
+                    <td>{{ enquiry.enquiry_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 

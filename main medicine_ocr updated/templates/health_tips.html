@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tips - Dr. Jeevika</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffb6c1;
+            --secondary-color: #ffc0cb;
+            --accent-color: #ff69b4;
+            --text-color: #4a4a4a;
+            --light-bg: #fff0f5;
+            --white: #ffffff;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffe4e1 0%, #ffb6c1 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.05); /* Subtle text shadow for depth */
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px; /* Larger border-radius */
+            box-shadow: 0 15px 30px rgba(255, 182, 193, 0.3); /* Stronger shadow */
+            padding: 40px;
+            backdrop-filter: blur(10px); /* More blur */
+            text-align: center;
+            animation: fadeInUp 0.8s ease-out forwards; /* Apply entrance animation */
+        }
+
+        .container:hover {
+            transform: translateY(-8px); /* Lift effect on hover */
+            box-shadow: 0 20px 40px rgba(255, 182, 193, 0.4); /* Stronger shadow on hover */
+            transition: all 0.4s ease;
+        }
+
+        .header {
+            color: var(--accent-color);
+            font-size: 2.8rem; /* Consistent font size */
+            font-weight: 700;
+            margin-bottom: 35px;
+        }
+
+        .health-tip-card {
+            background-color: var(--light-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: left;
+            box-shadow: 0 5px 15px rgba(255, 182, 193, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .health-tip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(255, 182, 193, 0.3);
+        }
+
+        .health-tip-card h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .health-tip-card p {
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--accent-color);
+            transform: translateX(-5px);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><i class="fas fa-lightbulb"></i> Daily Health Tips</div>
+
+        <div class="health-tip-card">
+            <h3>Stay Hydrated</h3>
+            <p>Drink at least 8 glasses of water a day. Proper hydration is crucial for maintaining body functions, energy levels, and skin health.</p>
+        </div>
+
+        <div class="health-tip-card">
+            <h3>Eat a Balanced Diet</h3>
+            <p>Focus on whole, unprocessed foods. Include plenty of fruits, vegetables, lean proteins, and whole grains to get essential nutrients.</p>
+        </div>
+
+        <div class="health-tip-card">
+            <h3>Get Regular Exercise</h3>
+            <p>Aim for at least 30 minutes of moderate-intensity exercise most days of the week. Physical activity boosts mood, energy, and overall health.</p>
+        </div>
+
+        <div class="health-tip-card">
+            <h3>Prioritize Sleep</h3>
+            <p>Ensure you get 7-9 hours of quality sleep each night. Adequate sleep is vital for mental and physical recovery, and cognitive function.</p>
+        </div>
+
+        <div class="health-tip-card">
+            <h3>Manage Stress</h3>
+            <p>Practice stress-reducing techniques like meditation, yoga, or deep breathing. Chronic stress can negatively impact your health.</p>
+        </div>
+
+        <a href="/index" class="back-link"><i class="fas fa-arrow-left"></i> Back to User Portal</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

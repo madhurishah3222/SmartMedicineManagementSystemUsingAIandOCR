@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Check Availability{% endblock %}
+{% block additional_styles %}
+  .page-title { color: var(--primary-color); font-weight: 700; text-align: center; }
+  /* Nude pink background for this page */
+  .content-wrapper {
+    background:
+      radial-gradient(1200px 600px at -10% -20%, rgba(255, 182, 193, 0.12) 0%, transparent 60%),
+      radial-gradient(1200px 600px at 110% 120%, rgba(255, 192, 203, 0.14) 0%, transparent 60%),
+      linear-gradient(135deg, #fff5f8 0%, #ffe3ee 100%);
+  }
+  #availForm {
+    max-width: 1000px; margin: 0 auto;
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 16px; padding: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    display: grid; grid-template-columns: 1fr 160px auto; gap: 12px;
+  }
+  #availForm:focus-within {
+    border-color: #f8bbd0;
+    box-shadow: 0 0 0 4px rgba(232,62,140,0.08), 0 8px 24px rgba(232,62,140,0.12);
+  }
+  #availResult { max-width: 1000px; margin: 14px auto 0; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); }
+  .bar-input { border-radius: 9999px; border: 1px solid var(--border-color); padding: 12px 18px; }
+  .bar-input:focus { box-shadow: 0 0 0 0.2rem rgba(232,62,140,0.15); border-color: var(--primary-color); }
+  .bar-button { border-radius: 9999px; padding: 12px 22px; }
+  .btn-primary { background: linear-gradient(90deg, var(--primary-color), #ff69b4); border-color: var(--primary-color); }
+  .btn-primary:hover { background: #d63384; border-color: #d63384; }
+{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <h2 class="mb-3 page-title">Check Medicine Availability</h2>
+  <form id="availForm">
+      <input type="text" class="bar-input" id="medName" placeholder="Medicine name (e.g., Dolo 650)" required />
+      <input type="number" class="bar-input" id="medQty" min="1" value="1" placeholder="Qty" />
+      <button class="btn btn-primary bar-button" type="submit">Check</button>
+  </form>
+  <div id="availResult" class="mt-4 p-3 border rounded bg-light"></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById('availForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const box = document.getElementById('availResult');
+    box.innerHTML = 'Checking...';
+    try {
+      const name = document.getElementById('medName').value.trim();
+      const qty = parseInt(document.getElementById('medQty').value || '1', 10);
+      const r = await fetch('/api/check_medicine_availability', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({medicine_name:name, quantity:qty})});
+      const data = await r.json();
+      box.innerHTML = data.response || 'No result.';
+    } catch(err){
+      box.innerHTML = 'Failed to check availability.';
+    }
+  });
+</script>
+{% endblock %}

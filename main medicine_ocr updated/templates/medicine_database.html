@@ -1,0 +1,552 @@
+{% extends "base.html" %}
+
+{% block title %}Medicine Database{% endblock %}
+
+{% block additional_styles %}
+<style>
+    .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 1400px;
+        margin: 30px auto;
+        animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .page-header h1 {
+        color: #2c3e50;
+        font-size: 2.8em;
+        font-weight: 700;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .page-header::after {
+        content: '';
+        display: block;
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #e83e8c, #6f42c1);
+        margin: 15px auto;
+        border-radius: 2px;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin: 20px 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+    }
+
+    th {
+        background: linear-gradient(135deg, #e83e8c, #6f42c1);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.9em;
+        padding: 18px 15px;
+        text-align: left;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    th:first-child {
+        border-top-left-radius: 12px;
+    }
+
+    th:last-child {
+        border-top-right-radius: 12px;
+    }
+
+    td {
+        padding: 16px 15px;
+        border-bottom: 1px solid #f0f0f0;
+        color: #2c3e50;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+    }
+
+    tr {
+        transition: all 0.3s ease;
+    }
+
+    tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Highlight expiring medicines */
+    tr.expiring-soon {
+        background-color: #fff3cd !important;
+        border-left: 4px solid #ffc107;
+    }
+    
+    tr.expiring-soon:hover {
+        background-color: #ffe69c !important;
+    }
+    
+    .expiry-badge {
+        background-color: #ffc107;
+        color: #000;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+        white-space: nowrap;
+        display: inline-block;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    tr:hover td {
+        color: #e83e8c;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #6f42c1, #e83e8c);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .back-button:active {
+        transform: translateY(0);
+    }
+
+    /* Status indicators */
+    .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+
+    .status-active {
+        background-color: #28a745;
+    }
+
+    .status-expiring {
+        background-color: #ffc107;
+    }
+
+    .status-expired {
+        background-color: #dc3545;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 20px;
+            margin: 15px;
+        }
+
+        .page-header h1 {
+            font-size: 2em;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            font-size: 0.9em;
+        }
+    }
+
+    /* Loading animation */
+    .loading {
+        display: none;
+        text-align: center;
+        padding: 20px;
+    }
+
+    .loading::after {
+        content: '';
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #e83e8c;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .search-container {
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .search-box {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 1.1em;
+        border: 2px solid #e0e0e0;
+        border-radius: 10px;
+        background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding-right: 40px; /* Make space for the clear button */
+    }
+
+    .search-box:focus {
+        outline: none;
+        border-color: #e83e8c;
+        box-shadow: 0 4px 15px rgba(232, 62, 140, 0.1);
+    }
+
+    .clear-search {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        font-size: 1.2em;
+        transition: color 0.2s ease;
+        display: none; /* Hidden by default */
+    }
+
+    .clear-search:hover {
+        color: #333;
+    }
+
+    .suggestions-container {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 5px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+    .suggestion-item {
+        padding: 12px 20px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+        background-color: #f8f9fa;
+        color: #e83e8c;
+    }
+
+    .highlight {
+        background-color: #fff3cd;
+        padding: 2px;
+        border-radius: 3px;
+    }
+
+    .no-results {
+        padding: 15px 20px;
+        color: #6c757d;
+        text-align: center;
+        font-style: italic;
+    }
+
+    /* Custom scrollbar for suggestions */
+    .suggestions-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .suggestions-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+
+    .suggestions-container::-webkit-scrollbar-thumb {
+        background: #e83e8c;
+        border-radius: 4px;
+    }
+
+    .suggestions-container::-webkit-scrollbar-thumb:hover {
+        background: #d63384;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Debug Info (temporary) -->
+    <div style="background: #f8f9fa; padding: 10px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px;">
+        <h4>Debug Info:</h4>
+        <p>Show Alert: {{ show_alert }}</p>
+        <p>Expiring Medicines Count: {{ expiring_meds|length }}</p>
+        {% for med in expiring_meds %}
+        <p>{{ med.name }} ({{ med.batch }}) - {{ med.days_left }} days left (expires {{ med.expiry_date }})</p>
+        {% endfor %}
+    </div>
+    
+    {% if show_alert %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert" style="background: linear-gradient(135deg, #fff3cd, #ffc107); border: none; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <h5 class="alert-heading mb-2">⚠️ Expiring Soon Alert</h5>
+                <p class="mb-0">The following medicines are expiring within 6 months. Please prioritize selling these batches:</p>
+                <ul class="mb-0 mt-2">
+                    {% for med in expiring_meds %}
+                    <li><strong>{{ med.name }}</strong> (Batch: {{ med.batch }}) - Expires in {{ med.days_left }} days ({{ med.expiry_date.strftime('%Y-%m-%d') }})</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="position: absolute; top: 1rem; right: 1rem;"></button>
+    </div>
+    {% endif %}
+    <div class="page-header">
+        <h1>Medicine Database</h1>
+    </div>
+
+    <div class="search-container">
+        <input type="text" 
+               class="search-box" 
+               id="medicineSearch" 
+               placeholder="Search medicines by name, brand, or category..."
+               autocomplete="off">
+        <i class="fas fa-times clear-search" id="clearSearch"></i>
+        <div class="suggestions-container" id="suggestions"></div>
+    </div>
+    
+    <div class="table-container">
+        <table id="medicineTable">
+            <thead>
+                <tr>
+                    <th>Batch ID</th>
+                    <th>Medicine Name</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Batch Number</th>
+                    <th>Quantity</th>
+                    <th>Price Per Unit</th>
+                    <th>Manufacture Date</th>
+                    <th>Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in medicines %}
+                <tr class="{% if medicine.is_expiring_soon %}expiring-soon{% endif %}" 
+                    data-medicine-name="{{ medicine.medicine_name|lower }}" 
+                    data-brand="{{ medicine.brand|lower }}"
+                    data-category="{{ medicine.category|lower }}">
+                    <td>{{ medicine.batch_id }}</td>
+                    <td>
+                        {{ medicine.medicine_name }}
+                        {% if medicine.is_expiring_soon %}
+                        <span class="expiry-badge" title="Expiring in {{ medicine.days_until_expiry }} days">
+                            <i class="fas fa-clock"></i> {{ medicine.days_until_expiry }}d
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ medicine.brand }}</td>
+                    <td>{{ medicine.category }}</td>
+                    <td>{{ medicine.batch_number }}</td>
+                    <td>{{ medicine.quantity }}</td>
+                    <td>₹{{ "%.2f"|format(medicine.price_per_unit) }}</td>
+                    <td>{{ medicine.manufacture_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ medicine.expiry_date.strftime('%Y-%m-%d') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="{{ url_for('index') }}" class="back-button">
+            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+            Back to Owner Portal
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://kit.fontawesome.com/your-font-awesome-kit.js" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchBox = document.getElementById('medicineSearch');
+        const suggestionsContainer = document.getElementById('suggestions');
+        const tableRows = document.querySelectorAll('#medicineTable tbody tr');
+        const clearSearchBtn = document.getElementById('clearSearch');
+        let timeoutId;
+
+        // Function to highlight matching text
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Function to show suggestions
+        function showSuggestions(searchTerm) {
+            if (!searchTerm) {
+                suggestionsContainer.style.display = 'none';
+                return;
+            }
+
+            const suggestions = new Set();
+            tableRows.forEach(row => {
+                const medicineName = row.dataset.medicineName;
+                const brand = row.dataset.brand;
+                const category = row.dataset.category;
+
+                if (medicineName.includes(searchTerm.toLowerCase())) {
+                    suggestions.add(row.cells[1].textContent);
+                }
+                if (brand.includes(searchTerm.toLowerCase())) {
+                    suggestions.add(row.cells[2].textContent);
+                }
+                if (category.includes(searchTerm.toLowerCase())) {
+                    suggestions.add(row.cells[3].textContent);
+                }
+            });
+
+            if (suggestions.size > 0) {
+                suggestionsContainer.innerHTML = Array.from(suggestions)
+                    .map(suggestion => `
+                        <div class="suggestion-item" data-value="${suggestion}">
+                            ${highlightText(suggestion, searchTerm)}
+                        </div>
+                    `).join('');
+                suggestionsContainer.style.display = 'block';
+            } else {
+                suggestionsContainer.innerHTML = '<div class="no-results">No matches found</div>';
+                suggestionsContainer.style.display = 'block';
+            }
+        }
+
+        // Function to filter table rows
+        function filterTable(searchTerm) {
+            tableRows.forEach(row => {
+                const medicineName = row.dataset.medicineName;
+                const brand = row.dataset.brand;
+                const category = row.dataset.category;
+                const searchTermLower = searchTerm.toLowerCase();
+
+                if (medicineName.includes(searchTermLower) ||
+                    brand.includes(searchTermLower) ||
+                    category.includes(searchTermLower)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Event listener for search input
+        searchBox.addEventListener('input', function() {
+            clearTimeout(timeoutId);
+            const searchTerm = this.value.trim();
+            
+            if (searchTerm.length > 0) {
+                clearSearchBtn.style.display = 'block';
+            } else {
+                clearSearchBtn.style.display = 'none';
+            }
+
+            timeoutId = setTimeout(() => {
+                showSuggestions(searchTerm);
+                filterTable(searchTerm);
+            }, 300);
+        });
+
+        // Event listener for clear search button
+        clearSearchBtn.addEventListener('click', function() {
+            searchBox.value = '';
+            clearSearchBtn.style.display = 'none';
+            suggestionsContainer.style.display = 'none';
+            filterTable(''); // Show all rows
+            searchBox.focus(); // Keep focus on the search box
+        });
+
+        // Event listener for suggestion clicks
+        suggestionsContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('suggestion-item')) {
+                const selectedValue = e.target.dataset.value;
+                searchBox.value = selectedValue;
+                clearSearchBtn.style.display = 'block'; // Show clear button after selection
+                suggestionsContainer.style.display = 'none';
+                filterTable(selectedValue);
+            }
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!searchBox.contains(e.target) && !suggestionsContainer.contains(e.target) && !clearSearchBtn.contains(e.target)) {
+                suggestionsContainer.style.display = 'none';
+            }
+        });
+
+        // Add row hover effect
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                row.style.transform = 'scale(1.01)';
+                row.style.transition = 'all 0.3s ease';
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                row.style.transform = 'scale(1)';
+            });
+        });
+
+        // Initial check for clear button visibility on page load
+        if (searchBox.value.length > 0) {
+            clearSearchBtn.style.display = 'block';
+        }
+    });
+</script>
+{% endblock %} 

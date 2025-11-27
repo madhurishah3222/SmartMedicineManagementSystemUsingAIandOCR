@@ -1,0 +1,18 @@
+# Secrets and credentials
+vision-key.json
+*.json.json
+
+# Virtual environments
+venv/
+.venv/
+__pycache__/
+
+# macOS
+__MACOSX/
+.DS_Store
+
+# Database files (optional - remove if you want to track them)
+# instance/*.db
+
+# IDE
+.vscode/
